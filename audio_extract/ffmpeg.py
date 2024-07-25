@@ -34,7 +34,6 @@ def extract_audio(input_path: str, output_path: str = "./audio.mp3", output_form
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, startupinfo=si)
 
     if result.returncode == 0:
-        print(f"Success : audio file has been saved to \"{cleaned_output_path}\".")
-    else:
-        error = result.stderr.decode().strip().split("\n")[-1]
-        raise Exception(f"Failed : {error}.")
+        return f"Success : audio file has been saved to \"{cleaned_output_path}\"."
+    error = result.stderr.decode().strip().split("\n")[-1]
+    return f"Failed : {error}."
