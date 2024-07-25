@@ -1,18 +1,18 @@
+from __future__ import annotations
+
 import mutagen
 
 
 def media_duration(file_path: str):
     file = mutagen.File(file_path)
-    duration = file.info.length
-    return duration
+    return file.info.length
 
 
 def seconds_to_hms(seconds: float | int) -> str:
     hours = int(seconds // 3600)
     minutes = int((seconds % 3600) // 60)
     seconds = int(seconds % 60)
-    hms = "{:02d}:{:02d}:{:02d}".format(hours, minutes, seconds)
-    return hms
+    return "{:02d}:{:02d}:{:02d}".format(hours, minutes, seconds)
 
 
 def hms_to_seconds(time_str: str) -> float:

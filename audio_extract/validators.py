@@ -37,8 +37,8 @@ class AudioExtractValidator:
     def _validate_input_path(self):
         input_path = os.path.abspath(self.input_path)
 
-        if not any(input_path.endswith("." + x) for x in SUPPORTED_FFMPEG_FORMATS):
-            raise Exception(f"Input file format not supported. Only (Video/Audio) allowed.")
+        if not any(input_path.endswith(f".{x}") for x in SUPPORTED_FFMPEG_FORMATS):
+            raise Exception("Input file format not supported. Only (Video/Audio) allowed.")
 
         if not os.path.isfile(input_path):
             raise Exception(f"{input_path} was not found, please provide a valid file path.")
@@ -48,7 +48,7 @@ class AudioExtractValidator:
     def _validate_output_path(self):
         output_path = self.output_path
         if output_path.endswith("/") or output_path.endswith("\\"):
-            output_path += "audio." + self.output_format
+            output_path += f"audio.{self.output_format}"
 
         output_path = os.path.abspath(output_path)
         output_parts = output_path.split(os.sep)
@@ -58,7 +58,7 @@ class AudioExtractValidator:
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        extension = "." + self.output_format
+        extension = f".{self.output_format}"
         if not filename.endswith(extension):
             output_path = output_path + extension
 

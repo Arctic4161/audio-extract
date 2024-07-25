@@ -19,19 +19,20 @@ def extract_audio(input_path: str, output_path: str = "./audio.mp3", output_form
     cleaned_output_path = result["output_path"]
     cleaned_output_format = result["output_format"]
     cleaned_start_time = result["start_time"]
-    cleaned_duration = result["duration"]
-
     command = [FFMPEG_BINARY,
                '-i', cleaned_input_path,
                '-ss', cleaned_start_time,
                '-f', cleaned_output_format,
                '-y', cleaned_output_path]
 
-    if cleaned_duration:
+    if cleaned_duration := result["duration"]:
         command.insert(3, "-t")
         command.insert(4, cleaned_duration)
 
-    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, startupinfo=si)
+
     if result.returncode == 0:
         print(f"Success : audio file has been saved to \"{cleaned_output_path}\".")
     else:
