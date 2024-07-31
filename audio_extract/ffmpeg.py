@@ -1,6 +1,7 @@
 # Other modules
 import subprocess
 import imageio_ffmpeg
+import platform
 
 # Local modules
 from audio_extract.validators import AudioExtractValidator
@@ -29,9 +30,12 @@ def extract_audio(input_path: str, output_path: str = "./audio.mp3", output_form
         command.insert(3, "-t")
         command.insert(4, cleaned_duration)
 
-    si = subprocess.STARTUPINFO()
-    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, startupinfo=si)
+    if platform.system() == "Windows":
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, startupinfo=si)
+    else:
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
 
     if result.returncode == 0:
         return f"Success : audio file has been saved to \"{cleaned_output_path}\"."
