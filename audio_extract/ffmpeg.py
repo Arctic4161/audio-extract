@@ -53,11 +53,11 @@ def extract_audio(input_path: str, output_path: str = "./audio.mp3", output_form
     else:
         if duration_local is False:
             d = FFMPEG_BINARY.Run(str(
-                f'-i {cleaned_input_path} -ss {cleaned_start_time} -f {cleaned_output_format} -vn -y {cleaned_output_path}'))
+                f'-i "{cleaned_input_path}" -ss {cleaned_start_time} -f {cleaned_output_format} -vn -y "{cleaned_output_path}"'))
             print(d)
         else:
             d = FFMPEG_BINARY.Run(str(
-                f'-i {cleaned_input_path} -ss {cleaned_start_time} -t {cleaned_duration} -f {cleaned_output_format} -vn -y {cleaned_output_path}'))
+                f'-i "{cleaned_input_path}" -ss {cleaned_start_time} -t {cleaned_duration} -f {cleaned_output_format} -vn -y "{cleaned_output_path}"'))
             print(d)
 
     if type(result) != dict:
