@@ -58,7 +58,8 @@ def extract_audio(input_path: str, output_path: str = "./audio.mp3", output_form
             FFMPEG_BINARY.Run(str(
                 f'-i {cleaned_input_path} -ss {cleaned_start_time} -t {cleaned_duration} -f {cleaned_output_format} -y {cleaned_output_path}'))
 
-    if result.returncode == 0:
-        return f"Success : audio file has been saved to \"{cleaned_output_path}\"."
-    error = result.stderr.decode().strip().split("\n")[-1]
-    return f"Failed : {error}."
+    if type(result) != dict:
+        if result.returncode == 0:
+            return f"Success : audio file has been saved to \"{cleaned_output_path}\"."
+        error = result.stderr.decode().strip().split("\n")[-1]
+        return f"Failed : {error}."
