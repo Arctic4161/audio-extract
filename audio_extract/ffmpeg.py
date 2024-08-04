@@ -1,18 +1,17 @@
 # Other modules
 import subprocess
-import platform
-from kivy import platform
-
+import os
+import sys
 # Local modules
 from audio_extract.validators import AudioExtractValidator
 
-if platform != "android":
-    import imageio_ffmpeg
-    FFMPEG_BINARY = imageio_ffmpeg.get_ffmpeg_exe()
-else:
+if 'ANDROID_ARGUMENT' in os.environ or 'P4A_BOOTSTRAP' in os.environ:
     from jnius import autoclass
     from jnius import *
     FFMPEG_BINARY = autoclass('com.sahib.pyff.ffpy')
+else:
+    import imageio_ffmpeg
+    FFMPEG_BINARY = imageio_ffmpeg.get_ffmpeg_exe()
 
 
 def extract_audio(input_path: str, output_path: str = "./audio.mp3", output_format: str = "mp3",
@@ -20,47 +19,47 @@ def extract_audio(input_path: str, output_path: str = "./audio.mp3", output_form
                   duration: float = None,
                   overwrite: bool = False):
     validator = AudioExtractValidator(input_path, output_path, output_format, duration, start_time, overwrite)
-    if platform != "android":
-        android_local = False
-    else:
-        android_local = True
-    result = validator.validate()
+    platform = None
+    if 'ANDROID_ARGUMENT' in os.environ or 'P4A_BOOTSTRAP' in os.environ:
+        platform = 'android'
+    elif os.name == 'nt':
+        platform = 'win'
+    android_local = bool(platform == "android")
+    duration_local = False
 
+    result = validator.validate()
     cleaned_input_path = result["input_path"]
     cleaned_output_path = result["output_path"]
     cleaned_output_format = result["output_format"]
     cleaned_start_time = result["start_time"]
-    if android_local is False:
+
+    if not android_local:
         command = [FFMPEG_BINARY,
                    '-i', cleaned_input_path,
                    '-ss', cleaned_start_time,
                    '-f', cleaned_output_format,
                    '-y', cleaned_output_path]
+
     if cleaned_duration := result["duration"]:
         duration_local = True
-        if android_local is False:
+        if not android_local:
             command.insert(3, "-t")
             command.insert(4, cleaned_duration)
-    else:
-        duration_local = False
 
     if platform == "win":
         si = subprocess.STARTUPINFO()
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, startupinfo=si)
-    if android_local is False:
+    elif not android_local:
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
     else:
-        if duration_local is False:
-            d = FFMPEG_BINARY.Run(str(
-                f'-i "{cleaned_input_path}" -ss {cleaned_start_time} -f {cleaned_output_format} -y "{cleaned_output_path}"'))
-            print(d)
+        print('Running android FFMPEG')
+        if not duration_local:
+            command = f'-i "{cleaned_input_path}" -ss {cleaned_start_time} -f {cleaned_output_format} -y "{cleaned_output_path}"'
         else:
-            d = FFMPEG_BINARY.Run(str(
-                f'-i "{cleaned_input_path}" -ss {cleaned_start_time} -t {cleaned_duration} -f {cleaned_output_format}'
-                f' -y "{cleaned_output_path}"'))
-            print(d)
-
+            command = f'-i "{cleaned_input_path}" -ss {cleaned_start_time} -t {cleaned_duration} -f {cleaned_output_format} -y "{cleaned_output_path}"'
+        d = FFMPEG_BINARY.Run(str(command))
+        print(d)
     if type(result) != dict:
         if result.returncode == 0:
             return f"Success : audio file has been saved to \"{cleaned_output_path}\"."
